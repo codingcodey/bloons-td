@@ -7,25 +7,22 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Projectile, function (sprite3, ot
     info.changeScoreBy(1)
 })
 sprites.onDestroyed(SpriteKind.Tower, function (sprite) {
-    cloneSprite("sprite")
-    dart = sprites.createProjectileFromSprite(img`
-        2 . 2 2 . . . . 
-        2 2 2 2 2 2 2 2 
-        2 . 2 2 . . . . 
-        . . . . . . . . 
-        `, sprite, 50, 0)
+	
 })
 function createTower () {
-    if (info.score() > 5) {
+    if (info.score() >= 5) {
         bloonPopper = sprites.create(towers._pickRandom(), SpriteKind.Tower)
+        console.log(bloonPopper)
         tiles.placeOnTile(bloonPopper, tiles.locationOfSprite(cursor))
-        info.changeScoreBy(-4)
+        console.log(bloonPopper)
+        info.changeScoreBy(-5)
     }
 }
-function cloneSprite (sprite2: string) {
-    newSprite = sprites.create(bloonPopper.image, bloonPopper.kind())
-    newSprite.x = bloonPopper.x
-    newSprite.y = bloonPopper.y
+function cloneSprite (sprite: Sprite) {
+    console.log(sprite)
+    newSprite = sprites.create(sprite.image, sprite.kind())
+    newSprite.x = sprite.x
+    newSprite.y = sprite.y
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (canCreate) {
@@ -33,28 +30,35 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 function makeBloonPopperProjectile (bloonPopper: Sprite) {
-    projectile = sprites.createProjectileFromSprite(img`
-        2 . 2 2 . . . . 
-        2 2 2 2 2 2 2 2 
-        2 . 2 2 . . . . 
-        . . . . . . . . 
-        `, bloonPopper, 50, 0)
+    dart = sprites.createProjectileFromSprite(img`
+        . 5 . 2 2 . 5 . 
+        . . 2 3 3 2 . . 
+        . . 2 3 3 2 . . 
+        . 5 . 2 2 . 5 . 
+        `, bloonPopper, 0, 0)
+    if (bloonPopper.tileKindAt(TileDirection.Top, sprites.castle.tilePath5)) {
+        dart.vy = -50
+    } else if (bloonPopper.tileKindAt(TileDirection.Right, sprites.castle.tilePath5)) {
+        dart.vx = 50
+    } else if (bloonPopper.tileKindAt(TileDirection.Bottom, sprites.castle.tilePath5)) {
+        dart.vy = 50
+    } else if (bloonPopper.tileKindAt(TileDirection.Left, sprites.castle.tilePath5)) {
+        dart.vx = -50
+    }
 }
-sprites.onCreated(SpriteKind.Tower, function (sprite4) {
-    sprite4.lifespan = 500
-})
 info.onCountdownEnd(function () {
     game.over(true, effects.confetti)
 })
 scene.onOverlapTile(SpriteKind.Enemy, sprites.swamp.swampTile2, function (sprite5, location) {
     game.over(false, effects.dissolve)
 })
-let bloon: Sprite = null
-let projectile: Sprite = null
+sprites.onCreated(SpriteKind.Tower, function (towerSprite) {
+	
+})
+let dart: Sprite = null
 let canCreate = false
 let newSprite: Sprite = null
 let bloonPopper: Sprite = null
-let dart: Sprite = null
 let towers: Image[] = []
 let cursor: Sprite = null
 tiles.setCurrentTilemap(tilemap`level1`)
@@ -108,17 +112,33 @@ assets.image`Bloon0`,
 assets.image`Bloon2`,
 assets.image`Bloon3`
 ]
-info.setScore(10)
+info.setScore(20)
 game.onUpdate(function () {
     if (cursor.tileKindAt(TileDirection.Center, sprites.swamp.swampTile13)) {
         canCreate = true
+        cursor.setImage(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . f f f f f f f f f f . . . 
+            . . . f . . . . . . . . f . . . 
+            . . . f . . . . . . . . f . . . 
+            . . . f . . . . . . . . f . . . 
+            . . . f . . . . . . . . f . . . 
+            . . . f . . . . . . . . f . . . 
+            . . . f . . . . . . . . f . . . 
+            . . . f . . . . . . . . f . . . 
+            . . . f . . . . . . . . f . . . 
+            . . . f f f f f f f f f f . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `)
     } else {
         canCreate = false
+        cursor.setImage(assets.image`Cursor`)
     }
 })
-game.onUpdateInterval(1000, function () {
-    bloon = sprites.create(bloons._pickRandom(), SpriteKind.Enemy)
-    tiles.placeOnRandomTile(bloon, sprites.builtin.forestTiles0)
-    bloon.setVelocity(-10, 50)
-    scene.followPath(bloon, path)
+game.onUpdateInterval(500, function () {
+	
 })
