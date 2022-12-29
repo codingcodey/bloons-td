@@ -1,20 +1,14 @@
 namespace SpriteKind {
     export const Tower = SpriteKind.create()
 }
-sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Projectile, function (sprite3, otherSprite) {
-    sprite3.destroy()
-    otherSprite.destroy()
-    info.changeScoreBy(1)
-})
 sprites.onDestroyed(SpriteKind.Tower, function (sprite) {
-	
+    cloneSprite(sprite)
+    makeBloonPopperProjectile(sprite)
 })
 function createTower () {
     if (info.score() >= 5) {
         bloonPopper = sprites.create(towers._pickRandom(), SpriteKind.Tower)
-        console.log(bloonPopper)
         tiles.placeOnTile(bloonPopper, tiles.locationOfSprite(cursor))
-        console.log(bloonPopper)
         info.changeScoreBy(-5)
     }
 }
@@ -46,6 +40,11 @@ function makeBloonPopperProjectile (bloonPopper: Sprite) {
         dart.vx = -50
     }
 }
+sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Projectile, function (sprite, otherSprite) {
+    sprite.destroy()
+    otherSprite.destroy()
+    info.changeScoreBy(1)
+})
 info.onCountdownEnd(function () {
     game.over(true, effects.confetti)
 })
@@ -53,8 +52,9 @@ scene.onOverlapTile(SpriteKind.Enemy, sprites.swamp.swampTile2, function (sprite
     game.over(false, effects.dissolve)
 })
 sprites.onCreated(SpriteKind.Tower, function (towerSprite) {
-	
+    towerSprite.lifespan = 500
 })
+let bloon: Sprite = null
 let dart: Sprite = null
 let canCreate = false
 let newSprite: Sprite = null
@@ -139,6 +139,9 @@ game.onUpdate(function () {
         cursor.setImage(assets.image`Cursor`)
     }
 })
-game.onUpdateInterval(500, function () {
-	
+game.onUpdateInterval(100, function () {
+    bloon = sprites.create(bloons._pickRandom(), SpriteKind.Enemy)
+    tiles.placeOnRandomTile(bloon, sprites.builtin.forestTiles0)
+    bloon.setVelocity(-10, 50)
+    scene.followPath(bloon, path)
 })
