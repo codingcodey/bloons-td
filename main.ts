@@ -1,14 +1,11 @@
 namespace SpriteKind {
     export const Tower = SpriteKind.create()
 }
-sprites.onDestroyed(SpriteKind.Tower, function (sprite) {
-    cloneSprite(sprite)
-    makeBloonPopperProjectile(sprite)
-})
 function createTower () {
     if (info.score() >= 5) {
         bloonPopper = sprites.create(towers._pickRandom(), SpriteKind.Tower)
         tiles.placeOnTile(bloonPopper, tiles.locationOfSprite(cursor))
+        bloonPoppers.push(bloonPopper)
         info.changeScoreBy(-5)
     }
 }
@@ -24,12 +21,13 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 function makeBloonPopperProjectile (bloonPopper: Sprite) {
-    dart = sprites.createProjectileFromSprite(img`
+    dart = sprites.create(img`
         . 5 . 2 2 . 5 . 
-        . . 2 3 3 2 . . 
+        . . 2 4 3 2 . . 
         . . 2 3 3 2 . . 
         . 5 . 2 2 . 5 . 
-        `, bloonPopper, 0, 0)
+        `, SpriteKind.Projectile)
+    dart.setPosition(bloonPopper.x, bloonPopper.y)
     if (bloonPopper.tileKindAt(TileDirection.Top, sprites.castle.tilePath5)) {
         dart.vy = -50
     } else if (bloonPopper.tileKindAt(TileDirection.Right, sprites.castle.tilePath5)) {
@@ -51,14 +49,15 @@ info.onCountdownEnd(function () {
 scene.onOverlapTile(SpriteKind.Enemy, sprites.swamp.swampTile2, function (sprite5, location) {
     game.over(false, effects.dissolve)
 })
-sprites.onCreated(SpriteKind.Tower, function (towerSprite) {
-    towerSprite.lifespan = 500
+scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
+    sprite.destroy()
 })
 let bloon: Sprite = null
 let dart: Sprite = null
 let canCreate = false
 let newSprite: Sprite = null
 let bloonPopper: Sprite = null
+let bloonPoppers: Sprite[] = []
 let towers: Image[] = []
 let cursor: Sprite = null
 tiles.setCurrentTilemap(tilemap`level1`)
@@ -112,7 +111,8 @@ assets.image`Bloon0`,
 assets.image`Bloon2`,
 assets.image`Bloon3`
 ]
-info.setScore(20)
+bloonPoppers = []
+info.setScore(100)
 game.onUpdate(function () {
     if (cursor.tileKindAt(TileDirection.Center, sprites.swamp.swampTile13)) {
         canCreate = true
@@ -139,9 +139,14 @@ game.onUpdate(function () {
         cursor.setImage(assets.image`Cursor`)
     }
 })
-game.onUpdateInterval(100, function () {
+game.onUpdateInterval(1000, function () {
     bloon = sprites.create(bloons._pickRandom(), SpriteKind.Enemy)
     tiles.placeOnRandomTile(bloon, sprites.builtin.forestTiles0)
     bloon.setVelocity(-10, 50)
     scene.followPath(bloon, path)
+})
+game.onUpdateInterval(1000, function () {
+    for (let bloonPopper of bloonPoppers) {
+        makeBloonPopperProjectile(bloonPopper)
+    }
 })
