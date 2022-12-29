@@ -112,7 +112,7 @@ assets.image`Bloon2`,
 assets.image`Bloon3`
 ]
 bloonPoppers = []
-info.setScore(100)
+info.setScore(20)
 game.onUpdate(function () {
     if (cursor.tileKindAt(TileDirection.Center, sprites.swamp.swampTile13)) {
         canCreate = true
